@@ -287,7 +287,7 @@
 						receive_array[i] = push_letter;
 						OSSemPost(r_sem);
 						//CS END
-						OSFlagPost(r_grp, 0x0F, OS_FLAG_SET, &err);
+						OSFlagPost(r_grp, 0x01 << i, OS_FLAG_SET, &err);
 					}
 					else if (select == 2) {
 						

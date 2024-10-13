@@ -1,5 +1,5 @@
-#µC/OS-II
-##Real-time OS practice
+# µC/OS-II
+## Real-time OS practice
 
 week 1
 - bit wise operator
