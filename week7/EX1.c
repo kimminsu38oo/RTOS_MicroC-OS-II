@@ -235,7 +235,7 @@ void Task(void * pdata) {
 	int rand_num, num, maxnum, bgnd_color, fgnd_color;
 	int task_num = (int)(*(char*)pdata - 48);
 	INT8U err, i, j;
-	OS_FLAGS flags[4] = { 0x01, 0x02, 0x04, 0x08 }; //0000 0001, 0000 0010, 0000 0100, 0000 1000
+	OS_FLAGS flags[3] = {0x01, 0x02, 0x04}; //0000 0001, 0000 0010, 0000 0100, 0000 1000
 	char color;
 	char colors[3] = { 'R','B','G' };
 	char s[10];
@@ -243,7 +243,7 @@ void Task(void * pdata) {
 	if (*(char*)pdata == '4') { //s display task
 		for (;;) {
 			// pending for R B G (your code)
-			color = *(char *)(OSMboxPend(colorMbox[0], 0, &err));
+			color = *(char *)OSMboxPend(colorMbox[0], 0, &err);
 			if (color == 'R')
 				bgnd_color = DISP_BGND_RED;
 			else if (color == 'B')
@@ -265,7 +265,7 @@ void Task(void * pdata) {
 			maxnum = 0; 
 			for (i = 0; i < 3; i++) {
 				// pending for random number (your code)
-				num = *(int *)(OSMboxPend(numberMbox[i], 0, &err));
+				num = *(int *)OSMboxPend(numberMbox[i], 0, &err);
 				if (num > maxnum) {
 					maxnum = num;
 					color = colors[i];
@@ -277,7 +277,7 @@ void Task(void * pdata) {
 			}
 			// post the R,B,G to display task and pending(your code)
 			OSMboxPost(colorMbox[0], (void *)&color);
-			OSFlagPend(grp, flags[task_num], OS_FLAG_WAIT_SET_ALL + OS_FLAG_CONSUME, 0, &err);
+			OSFlagPend(grp, 0x08, OS_FLAG_WAIT_SET_ALL + OS_FLAG_CONSUME, 0, &err);
 		}
 	}
 	else { //three random tasks
