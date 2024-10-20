@@ -20,6 +20,7 @@
 
 #define          TASK_STK_SIZE     512                /* Size of each task's stacks (# of WORDs)       */
 #define N_TASK 5
+#define MSG_QUEUE_SIZE	4
 
 /*
 *********************************************************************************************************
@@ -118,8 +119,9 @@ static void  TaskStart (void *pdata)
 		
 	}
 	else if (select == 2) {
-		
-		
+		queue_to_decision = OSQCreate(&random_queue[0], MSG_QUEUE_SIZE);
+		queue_to_random = OSQCreate(&decision_queue[0], MSG_QUEUE_SIZE);
+
 	}
   
     TaskStartCreateTasks();                                /* Create all other tasks                   */
@@ -237,7 +239,7 @@ static  void  TaskStartCreateTasks (void)
 	}
 }
 
-void Task(void * pdata) {
+void Task(void *pdata) {
 	INT8U err;
 
 	INT8U push_number;
@@ -260,12 +262,12 @@ void Task(void * pdata) {
 	if (*(char*)pdata == '4') { // decision task
 		for (;;) {
 			for (i = 0;  i < N_TASK - 1; i++) {
-				if (select == 1) {
+				if (select == 1) { // mailbox
 					// Wait until the random number arrives. Store the value in the get_number array. (your code)
-					get_number[i] = *(int *)OSMboxPend(mbox_to_random[i], 0, &err);
-				}
-				else if (select == 2) {
-					
+					get_number[i] = *(int *)OSMboxPend(mbox_to_decision[i], 0, &err);
+				} 
+				else if (select == 2) {  // message queue
+					get_number[i] = *(int *)OSQPend(queue_to_decision, 0, &err);
 				}
 			}
 			min = get_number[0];
@@ -287,10 +289,10 @@ void Task(void * pdata) {
 
 				if (select == 1) {
 					// Send W or L to the random task. (your code)
-					OSMboxPost(mbox_to_decision[i], (void *)&push_letter);
+					OSMboxPost(mbox_to_random[i], (void *)&push_letter);
 				}
 				else if (select == 2) {
-					
+					OSQPost(queue_to_random, (void *)&push_letter);	
 				}
 			}
 			OSTimeDlyHMSM(0, 0, 5, 0);
@@ -307,11 +309,12 @@ void Task(void * pdata) {
 
 			if (select == 1) {
 				// Post to the decision task and wait with pend. (your code)
-                OSMboxPost(mbox_to_random[task_number], (void *)&push_number);
-				get_letter = *(char *)OSMboxPend(mbox_to_decision[task_number], 0, &err);
+                OSMboxPost(mbox_to_decision[task_number], (void *)&push_number);
+				get_letter = *(char *)OSMboxPend(mbox_to_random[task_number], 0, &err);
 			}
 			else if (select == 2) {
-				
+				OSQPost(queue_to_decision, (void *)&push_number);
+				get_letter = *(char *)OSQPend(queue_to_random, 0, &err);
 			}
 			
 			if (*(char*)pdata == '0') {
