@@ -100,7 +100,7 @@ task 2 {
 # Event Flag
 
 Event flags can effectively synchronize multiple tasks.
-Unlike others that use ECB, this uses OS_EVENT_GRP.
+Unlike others that use ECB, this uses OS_FLAG_GRP.
 
 Event flags have two data structures. 
 
@@ -186,3 +186,6 @@ if (priority > S.C | S.C X)
 else
 	block
 ```
+
+µC/OS-IIs uses PIP. 
+However, the programmer must specify the pip number.
